@@ -8,11 +8,10 @@ import java.util.ArrayList;
 
 public class Children_Population{
 
-    protected static ArrayList<GfileObject> getChilds(String parent,StringBuffer fileJson)
+    protected static ArrayList<GfileObject> getChilds(String parent,JSONArray fileList)
     {
         ArrayList<GfileObject> resultList = new ArrayList<>();
         try {
-            JSONArray fileList = (JSONArray) new JSONObject(fileJson.toString()).get("items");
             int fileCount = 0;
             while (fileCount < fileList.length()) {
                 JSONObject temp = (JSONObject) fileList.get(fileCount);
@@ -29,7 +28,6 @@ public class Children_Population{
                         tem.setID(temp.getString("id"));
                         tem.setTitle(temp.getString("title"));
                         tem.setMimeType(temp.getString("mimeType"));
-                        //tem.setOwner(temp.getString("owner"));
                         tem.setDoc(temp.getString("createdDate"));
                         resultList.add(tem);
                     }
@@ -44,7 +42,6 @@ public class Children_Population{
                         tem.setID(temp.getString("id"));
                         tem.setTitle(temp.getString("title"));
                         tem.setMimeType(temp.getString("mimeType"));
-                        //tem.setOwner(temp.getString("owner"));
                         tem.setDoc(temp.getString("createdDate"));
                         resultList.add(tem);
                     }

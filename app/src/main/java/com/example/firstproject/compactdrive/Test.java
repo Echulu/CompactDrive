@@ -1,6 +1,7 @@
 package com.example.firstproject.compactdrive;
 
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -15,6 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,10 +30,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Stack;
 
-public class Test extends AppCompatActivity
+public class Test extends Activity
         implements NavigationView.OnNavigationItemSelectedListener {
     Toolbar toolbar;
+    public static Stack<AdapterView> parentStack = new Stack<AdapterView>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,9 +44,9 @@ public class Test extends AppCompatActivity
         setContentView(R.layout.activity_test);
         toolbar= (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Compact Drive");
-        Toast.makeText(getApplication().getBaseContext(),"GMAIL SET",
+        Toast.makeText(getApplication().getBaseContext(),"Google Drive Connected",
                 Toast.LENGTH_SHORT).show();
-        setSupportActionBar(toolbar);
+
 
 
 
@@ -55,15 +60,7 @@ public class Test extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -132,8 +129,22 @@ public class Test extends AppCompatActivity
                         while ((inputLine = in.readLine()) != null) {
                             fileJson.append(inputLine);
                         }
-                    } else if (c == 403) {
+                    } else if (c == 401) {
+
                         Client.refreshToken();
+                        HttpURLConnection con2 = (HttpURLConnection) temp.openConnection();
+                        con2.setRequestMethod("GET");
+                        authToken = "OAuth " + Client.aceToken;
+                        con2.setRequestProperty("Authorization", authToken);
+                        c = con2.getResponseCode();
+                        if (con2.getResponseCode() == 200) {
+                            BufferedReader in = new BufferedReader(new InputStreamReader(con2.getInputStream()));
+                            String inputLine;
+                            while ((inputLine = in.readLine()) != null) {
+                                fileJson.append(inputLine);
+                            }
+
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -147,25 +158,39 @@ public class Test extends AppCompatActivity
             super.onPostExecute(o);
             ArrayList<GfileObject> resultList = new ArrayList<>();
             try {
-                resultList = Children_Population.getChilds("root", fileJson);
+                GoogleChildrenTree.populateTree((JSONObject)new JSONObject(fileJson.toString()));
+                resultList = Children_Population.getChilds("root",GoogleChildrenTree.getChildrenByParent("root"));
                 FileAdapter ap = new FileAdapter(Test.this,resultList);
-                ListView list = (ListView)findViewById(R.id.listView);
+                final ListView list = (ListView)findViewById(R.id.listView);
                 list.setAdapter(ap);
                 list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        ArrayList<GfileObject> result = new ArrayList<GfileObject>();
-                        GfileObject temp = (GfileObject)parent.getItemAtPosition(position);
-                        result = Children_Population.getChilds(temp.getID(), fileJson);
-                        FileAdapter ap = new FileAdapter(Test.this,result);
-                        ListView list = (ListView)findViewById(R.id.listView);
-                        list.setAdapter(ap);
+                        try {
+                            parentStack.push(parent);
+                            ArrayList<GfileObject> adapter_result;
+                            GfileObject temp = (GfileObject) parent.getItemAtPosition(position);
+                            adapter_result = Children_Population.getChilds(temp.getID(), GoogleChildrenTree.getChildrenByParent(temp.getID()));
+                            FileAdapter ap = new FileAdapter(Test.this, adapter_result);
+                            ListView list = (ListView) findViewById(R.id.listView);
+                            list.setAdapter(ap);
+                        }
+                        catch(Exception e){
+                            Log.e("Test :",e.getMessage());
+                        }
                     }
                 });
             }
             catch (Exception e){
-                Log.i("Exception GMAIL_AUTH", e.getMessage());
+                Log.i("Exception in Test class", e.getMessage());
             }
         }
+    }
+    @Override
+    public void onBackPressed() {
+        ListView list = (ListView)findViewById(R.id.listView);
+
+        list.setAdapter((ListAdapter)parentStack.pop().getAdapter());
+
     }
 }

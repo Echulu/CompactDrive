@@ -6,6 +6,7 @@ class GfileObject {
     private String owner=null;
     private String dateOfCreation = null;
     private String mimeType =null;
+    private String parentId = null;
     public String getID(){
         return id;
     }
@@ -35,5 +36,11 @@ class GfileObject {
     }
     public void setMimeType(String mime){
         this.mimeType=mime;
+    }
+    public String getParentId() {
+        return parentId;
+    }
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 }

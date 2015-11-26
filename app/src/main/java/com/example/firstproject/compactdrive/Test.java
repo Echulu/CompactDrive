@@ -2,6 +2,7 @@ package com.example.firstproject.compactdrive;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -9,6 +10,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -30,12 +32,13 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 public class Test extends Activity
         implements NavigationView.OnNavigationItemSelectedListener {
     Toolbar toolbar;
-    public static Stack<AdapterView> parentStack = new Stack<AdapterView>();
+    public static Stack<String> parentStack = new Stack<String>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,9 +49,6 @@ public class Test extends Activity
         toolbar.setTitle("Compact Drive");
         Toast.makeText(getApplication().getBaseContext(),"Google Drive Connected",
                 Toast.LENGTH_SHORT).show();
-
-
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -160,6 +160,7 @@ public class Test extends Activity
             try {
                 GoogleChildrenTree.populateTree((JSONObject)new JSONObject(fileJson.toString()));
                 resultList = Children_Population.getChilds("root",GoogleChildrenTree.getChildrenByParent("root"));
+
                 FileAdapter ap = new FileAdapter(Test.this,resultList);
                 final ListView list = (ListView)findViewById(R.id.listView);
                 list.setAdapter(ap);
@@ -167,10 +168,11 @@ public class Test extends Activity
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         try {
-                            parentStack.push(parent);
+
                             ArrayList<GfileObject> adapter_result;
                             GfileObject temp = (GfileObject) parent.getItemAtPosition(position);
                             adapter_result = Children_Population.getChilds(temp.getID(), GoogleChildrenTree.getChildrenByParent(temp.getID()));
+                            parentStack.push(temp.getParentId());
                             FileAdapter ap = new FileAdapter(Test.this, adapter_result);
                             ListView list = (ListView) findViewById(R.id.listView);
                             list.setAdapter(ap);
@@ -188,9 +190,22 @@ public class Test extends Activity
     }
     @Override
     public void onBackPressed() {
-        ListView list = (ListView)findViewById(R.id.listView);
 
-        list.setAdapter((ListAdapter)parentStack.pop().getAdapter());
-
+        ArrayList<GfileObject> resultList = new ArrayList<>();
+        try {
+            String parentId = parentStack.pop();
+            resultList = Children_Population.getChilds(parentId,GoogleChildrenTree.getChildrenByParent(parentId));
+            FileAdapter ap = new FileAdapter(Test.this,resultList);
+            final ListView list = (ListView)findViewById(R.id.listView);
+            list.setAdapter(ap);
+        }
+        catch(EmptyStackException ese){
+            Intent gmail = new Intent(Test.this,Test.class);
+            gmail.putExtra(Library.PARENT,"root");
+            startActivity(gmail);
+        }
+        catch (Exception e){
+            Log.i("Exception in Test class", e.getMessage());
+        }
     }
 }

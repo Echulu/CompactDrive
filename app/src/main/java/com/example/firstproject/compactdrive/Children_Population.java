@@ -29,6 +29,7 @@ public class Children_Population{
                         tem.setTitle(temp.getString("title"));
                         tem.setMimeType(temp.getString("mimeType"));
                         tem.setDoc(temp.getString("createdDate"));
+                        tem.setParentId(parent);
                         resultList.add(tem);
                     }
                 }
@@ -43,6 +44,7 @@ public class Children_Population{
                         tem.setTitle(temp.getString("title"));
                         tem.setMimeType(temp.getString("mimeType"));
                         tem.setDoc(temp.getString("createdDate"));
+                        tem.setParentId(parent);
                         resultList.add(tem);
                     }
                 }

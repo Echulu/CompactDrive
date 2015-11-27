@@ -4,6 +4,7 @@ package com.example.firstproject.compactdrive;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -208,10 +209,13 @@ public class appcentral extends Activity
                         dateOfModification.setText(":"+temp.getDom());
                         owners.setText(":"+temp.getOwners());
                         PopupWindow my_popup = new PopupWindow(popupView, ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, true);
+                        my_popup.setBackgroundDrawable(new BitmapDrawable());
+                        my_popup.setOutsideTouchable(true);
                         my_popup.setFocusable(true);
                         my_popup.setOutsideTouchable(true);
                         my_popup.showAtLocation(popupView, Gravity.CENTER, 0, 0);
                         return true;
+
                     }
                 });
             }

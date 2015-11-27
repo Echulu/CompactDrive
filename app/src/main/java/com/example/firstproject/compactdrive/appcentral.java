@@ -127,22 +127,22 @@ public class appcentral extends Activity
                     con.setRequestMethod("GET");
                     String authToken = "OAuth " + Client.aceToken;
                     con.setRequestProperty("Authorization", authToken);
-                    int c = con.getResponseCode();
-                    if (con.getResponseCode() == 200) {
+                    int resCode = con.getResponseCode();
+                    if (resCode == 200) {
                         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                         String inputLine;
                         while ((inputLine = in.readLine()) != null) {
                             fileJson.append(inputLine);
                         }
-                    } else if (c == 401) {
+                    } else if (resCode == 401) {
 
                         Client.refreshToken();
                         HttpURLConnection con2 = (HttpURLConnection) temp.openConnection();
                         con2.setRequestMethod("GET");
                         authToken = "OAuth " + Client.aceToken;
                         con2.setRequestProperty("Authorization", authToken);
-                        c = con2.getResponseCode();
-                        if (con2.getResponseCode() == 200) {
+                        resCode = con2.getResponseCode();
+                        if (resCode == 200) {
                             BufferedReader in = new BufferedReader(new InputStreamReader(con2.getInputStream()));
                             String inputLine;
                             while ((inputLine = in.readLine()) != null) {
@@ -212,7 +212,6 @@ public class appcentral extends Activity
                         my_popup.setBackgroundDrawable(new BitmapDrawable());
                         my_popup.setOutsideTouchable(true);
                         my_popup.setFocusable(true);
-                        my_popup.setOutsideTouchable(true);
                         my_popup.showAtLocation(popupView, Gravity.CENTER, 0, 0);
                         return true;
 

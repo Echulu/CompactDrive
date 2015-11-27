@@ -15,6 +15,7 @@ public class Children_Population{
             int fileCount = 0;
             while (fileCount < fileList.length()) {
                 JSONObject temp = (JSONObject) fileList.get(fileCount);
+
                 JSONObject label = (JSONObject) temp.get("labels");
                 JSONArray parents = (JSONArray) temp.get("parents");
                 boolean isParent = false;
@@ -24,12 +25,15 @@ public class Children_Population{
                             isParent = true;
                     }
                     if (label.getString("trashed").equals("false") && isParent) {
+                        if(!temp.getString("mimeType").equals("application/vnd.google-apps.folder"))
+                            Log.i("MyMessage:",temp.getString("downloadUrl")+" "+temp.getString("title")+" "+temp.getString("id"));
                         GfileObject tem = new GfileObject();
                         tem.setID(temp.getString("id"));
                         tem.setTitle(temp.getString("title"));
                         tem.setMimeType(temp.getString("mimeType"));
                         tem.setOwners(temp.getJSONArray("ownerNames"));
                         tem.setDom(temp.getString("modifiedDate"));
+                        tem.setUrl(temp.getString("downloadUrl"));
                         tem.setDoc(temp.getString("createdDate"));
                         tem.setParentId(parent);
                         resultList.add(tem);

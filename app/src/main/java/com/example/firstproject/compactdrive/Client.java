@@ -98,7 +98,6 @@ public class Client {
                     token_stream.write(body_string.getBytes());
                     token_stream.flush();
                     token_stream.close();
-                    int c = con.getResponseCode();
                     BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                     String inputLine;
                     while ((inputLine = in.readLine()) != null) {

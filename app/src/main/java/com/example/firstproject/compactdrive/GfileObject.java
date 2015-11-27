@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import java.net.URL;
 
 class GfileObject {
     private String id=null;
@@ -13,6 +14,7 @@ class GfileObject {
     private String dateOfModification = null;
     private String mimeType =null;
     private String parentId = null;
+    private URL url=null;
     public String getID(){
         return id;
     }
@@ -62,5 +64,15 @@ class GfileObject {
     }
     public void setParentId(String parentId) {
         this.parentId = parentId;
+    }
+    public void setUrl(String url) {
+        try {
+            this.url = new URL(url);
+        } catch (Exception e) {
+            Log.i("setURL",e.getMessage());
+        }
+    }
+    public URL getUrl() {
+        return url;
     }
 }

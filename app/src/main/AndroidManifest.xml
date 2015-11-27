@@ -3,7 +3,7 @@
     package="com.example.firstproject.compactdrive" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-s
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -23,23 +23,15 @@ s
         <activity
             android:name=".Library"
             android:label="@string/title_activity_library"
-            android:theme="@style/AppTheme.NoActionBar" >
-        </activity>
-        <activity
-            android:name=".Populate_Children"
-            android:label="@string/title_activity_gmail__auth"
-            android:theme="@style/AppTheme.NoActionBar" >
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Auth"
             android:label="@string/title_activity_auth"
-            android:theme="@style/AppTheme.NoActionBar" >
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".Test"
+            android:name=".appcentral"
             android:label="@string/title_activity_test"
-            android:theme="@style/AppTheme.NoActionBar" >
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

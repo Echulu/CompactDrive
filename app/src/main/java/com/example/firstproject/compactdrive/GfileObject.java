@@ -1,10 +1,16 @@
 package com.example.firstproject.compactdrive;
 
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
 class GfileObject {
     private String id=null;
     private String title=null;
-    private String owner=null;
+    private JSONArray owner = new JSONArray();
     private String dateOfCreation = null;
+    private String dateOfModification = null;
     private String mimeType =null;
     private String parentId = null;
     public String getID(){
@@ -19,11 +25,25 @@ class GfileObject {
     public void setTitle(String title){
         this.title = title;
     }
-    public String getOwner(){
-        return owner;
+    public String getOwners(){
+        StringBuffer tmp = new StringBuffer();
+        for(int i=0;i<owner.length();i++)
+            try {
+                tmp=tmp.append(owner.get(i).toString()+",");
+            } catch (JSONException e) {
+                Log.i("Ex Gfo", e.getMessage());
+            }
+        String temp = tmp.substring(0,tmp.length()-1);
+        return temp;
     }
-    public void setOwner(String owner){
+    public void setOwners(JSONArray owner){
         this.owner = owner;
+    }
+    public String getDom(){
+        return dateOfModification;
+    }
+    public void setDom(String temp){
+        this.dateOfModification=temp;
     }
     public String getDoc(){
         return dateOfCreation;

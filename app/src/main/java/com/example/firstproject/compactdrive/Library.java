@@ -31,7 +31,7 @@ public class Library extends Activity {
                     Intent temp = new Intent(v.getContext(), Auth.class);
                     startActivityForResult(temp, 1);
                 }else{
-                    Intent gmail = new Intent(Library.this,Test.class);
+                    Intent gmail = new Intent(Library.this,appcentral.class);
                     startActivity(gmail);
                 }
             }
@@ -43,7 +43,7 @@ public class Library extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == 1){
             if(resultCode == RESULT_OK){
-                Intent gmail = new Intent(Library.this,Test.class);
+                Intent gmail = new Intent(Library.this,appcentral.class);
                 gmail.putExtra(PARENT,"root");
                 startActivity(gmail);
             }

@@ -2,15 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-        <item android:id="@+id/nav_gmail" android:icon="@android:drawable/ic_dialog_email"
+        <item
+            android:id="@+id/nav_gmail"
+            android:icon="@android:drawable/ic_dialog_email"
             android:title="Drive" />
-        <item android:id="@+id/nav_onedrive" android:icon="@android:drawable/ic_dialog_email"
-            android:title="One Drive" />
-        <item android:id="@+id/nav_dropbox" android:icon="@android:drawable/ic_dialog_email"
+        <item
+            android:id="@+id/nav_onedrive"
+            android:icon="@android:drawable/ic_dialog_email"
+            android:title="One Drive"
+            />
+
+        <item
+            android:id="@+id/nav_dropbox"
+            android:icon="@android:drawable/ic_dialog_email"
             android:title="Drop Box" />
 
     </group>
-
 
 
 </menu>

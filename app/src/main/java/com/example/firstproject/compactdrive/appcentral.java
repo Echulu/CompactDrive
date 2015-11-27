@@ -1,6 +1,7 @@
 package com.example.firstproject.compactdrive;
 
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -9,20 +10,24 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.menu.MenuBuilder;
+
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
+
+import android.widget.ImageView;
 import android.widget.ListView;
+
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,7 +40,7 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.Stack;
 
-public class Test extends Activity
+public class appcentral extends Activity
         implements NavigationView.OnNavigationItemSelectedListener {
     Toolbar toolbar;
     public static Stack<String> parentStack = new Stack<String>();
@@ -51,6 +56,7 @@ public class Test extends Activity
                 Toast.LENGTH_SHORT).show();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.openDrawer(Gravity.LEFT);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -71,12 +77,10 @@ public class Test extends Activity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+
         if (id == R.id.action_settings) {
             return true;
         }
@@ -117,7 +121,7 @@ public class Test extends Activity
         protected Object doInBackground(Object[] params) {
             if (Client.aceToken != null) {
                 try {
-                    URL temp = new URL("https://www.googleapis.com/drive/v2/files");
+                    URL temp = new URL(" https://www.googleapis.com/drive/v2/files");
                     HttpURLConnection con = (HttpURLConnection) temp.openConnection();
                     con.setRequestMethod("GET");
                     String authToken = "OAuth " + Client.aceToken;
@@ -154,37 +158,65 @@ public class Test extends Activity
         }
 
         @Override
-        protected void onPostExecute(Object o) {
+        protected void onPostExecute(final Object o) {
             super.onPostExecute(o);
             ArrayList<GfileObject> resultList = new ArrayList<>();
             try {
                 GoogleChildrenTree.populateTree((JSONObject)new JSONObject(fileJson.toString()));
                 resultList = Children_Population.getChilds("root",GoogleChildrenTree.getChildrenByParent("root"));
 
-                FileAdapter ap = new FileAdapter(Test.this,resultList);
+                FileAdapter ap = new FileAdapter(appcentral.this,resultList);
                 final ListView list = (ListView)findViewById(R.id.listView);
                 list.setAdapter(ap);
                 list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        try {
+                        GfileObject temp = (GfileObject) parent.getItemAtPosition(position);
+                        if(temp.getMimeType().equals("application/vnd.google-apps.folder")) {
+                            try {
 
-                            ArrayList<GfileObject> adapter_result;
-                            GfileObject temp = (GfileObject) parent.getItemAtPosition(position);
-                            adapter_result = Children_Population.getChilds(temp.getID(), GoogleChildrenTree.getChildrenByParent(temp.getID()));
-                            parentStack.push(temp.getParentId());
-                            FileAdapter ap = new FileAdapter(Test.this, adapter_result);
-                            ListView list = (ListView) findViewById(R.id.listView);
-                            list.setAdapter(ap);
+                                ArrayList<GfileObject> adapter_result;
+
+                                adapter_result = Children_Population.getChilds(temp.getID(), GoogleChildrenTree.getChildrenByParent(temp.getID()));
+                                parentStack.push(temp.getParentId());
+                                FileAdapter ap = new FileAdapter(appcentral.this, adapter_result);
+                                ListView list = (ListView) findViewById(R.id.listView);
+                                list.setAdapter(ap);
+                            } catch (Exception e) {
+                                Log.e("appcentral :", e.getMessage());
+                            }
                         }
-                        catch(Exception e){
-                            Log.e("Test :",e.getMessage());
+                        else{
+
                         }
+                    }
+                });
+                list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                        LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
+                                .getSystemService(LAYOUT_INFLATER_SERVICE);
+
+                        View popupView = layoutInflater.inflate(R.layout.item_popup, null);
+                        GfileObject temp = (GfileObject) parent.getItemAtPosition(position);
+                        TextView name = (TextView) popupView.findViewById(R.id.popup_name);
+                        TextView dateOfCreation = (TextView) popupView.findViewById(R.id.dateofcreation);
+                        TextView dateOfModification = (TextView) popupView.findViewById(R.id.dateofModification);
+                        TextView owners = (TextView) popupView.findViewById(R.id.ownerslist);
+                        name.setText(":"+temp.getTitle());
+                        dateOfCreation.setText(":"+temp.getDoc());
+                        dateOfModification.setText(":"+temp.getDom());
+                        owners.setText(":"+temp.getOwners());
+                        PopupWindow my_popup = new PopupWindow(popupView, ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, true);
+                        my_popup.setFocusable(true);
+                        my_popup.setOutsideTouchable(true);
+                        my_popup.showAtLocation(popupView, Gravity.CENTER, 0, 0);
+                        return true;
                     }
                 });
             }
             catch (Exception e){
-                Log.i("Exception in Test class", e.getMessage());
+                Log.e("Exception in appcentral class", e.getMessage());
             }
         }
     }
@@ -195,17 +227,17 @@ public class Test extends Activity
         try {
             String parentId = parentStack.pop();
             resultList = Children_Population.getChilds(parentId,GoogleChildrenTree.getChildrenByParent(parentId));
-            FileAdapter ap = new FileAdapter(Test.this,resultList);
+            FileAdapter ap = new FileAdapter(appcentral.this,resultList);
             final ListView list = (ListView)findViewById(R.id.listView);
             list.setAdapter(ap);
         }
         catch(EmptyStackException ese){
-            Intent gmail = new Intent(Test.this,Test.class);
-            gmail.putExtra(Library.PARENT,"root");
+            Intent gmail = new Intent(appcentral.this,Library.class);
             startActivity(gmail);
         }
         catch (Exception e){
-            Log.i("Exception in Test class", e.getMessage());
+            Log.i("Exception in appcentral class", e.getMessage());
         }
     }
+
 }

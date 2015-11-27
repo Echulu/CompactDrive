@@ -28,6 +28,8 @@ public class Children_Population{
                         tem.setID(temp.getString("id"));
                         tem.setTitle(temp.getString("title"));
                         tem.setMimeType(temp.getString("mimeType"));
+                        tem.setOwners(temp.getJSONArray("ownerNames"));
+                        tem.setDom(temp.getString("modifiedDate"));
                         tem.setDoc(temp.getString("createdDate"));
                         tem.setParentId(parent);
                         resultList.add(tem);
@@ -43,6 +45,8 @@ public class Children_Population{
                         tem.setID(temp.getString("id"));
                         tem.setTitle(temp.getString("title"));
                         tem.setMimeType(temp.getString("mimeType"));
+                        tem.setOwners(temp.getJSONArray("ownerNames"));
+                        tem.setDom(temp.getString("modifiedDate"));
                         tem.setDoc(temp.getString("createdDate"));
                         tem.setParentId(parent);
                         resultList.add(tem);

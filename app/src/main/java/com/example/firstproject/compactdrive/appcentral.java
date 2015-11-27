@@ -189,7 +189,8 @@ public class appcentral extends Activity
                         }
                         else{
                             Intent t = new Intent(appcentral.this,fileDownload.class);
-                            t.putExtra("GfileObject", temp);
+                            t.putExtra("fileURL",temp.getUrl());
+                            t.putExtra("filename",temp.getTitle());
                             startActivity(t);
                         }
                     }

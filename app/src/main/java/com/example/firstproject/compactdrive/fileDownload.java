@@ -1,9 +1,13 @@
 package com.example.firstproject.compactdrive;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,11 +20,14 @@ import java.nio.channels.ReadableByteChannel;
 
 public class fileDownload extends AppCompatActivity {
 
-    GfileObject gfo = null;
+    private String fileURL=null;
+    private String filename=null;
+    File my_file;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        gfo = (GfileObject)getIntent().getSerializableExtra("GfileObject");
+        fileURL = getIntent().getStringExtra(fileURL);
+        filename = getIntent().getStringExtra(filename);
         setContentView(R.layout.activity_file_download);
     }
     class My_Task extends AsyncTask{
@@ -29,7 +36,7 @@ public class fileDownload extends AppCompatActivity {
         protected Object doInBackground(Object[] params) {
             if (Client.aceToken != null) {
                 try {
-                    URL temp = gfo.getUrl();
+                    URL temp = new URL(fileURL);
                     HttpURLConnection con = (HttpURLConnection) temp.openConnection();
                     con.setRequestMethod("GET");
                     String authToken = "OAuth " + Client.aceToken;
@@ -39,7 +46,7 @@ public class fileDownload extends AppCompatActivity {
                         String storagePath = Library.context.getFilesDir().getPath();
                         File dir = new File(storagePath +"/compact drive");
                         if(dir.exists()) {
-                            String filePath = storagePath + "/compact drive/"+gfo.getTitle();
+                            String filePath = storagePath + "/compact drive/"+filename;
                             File temp_file = new File(filePath);
                             boolean fileExists = temp_file.exists();
                             if (fileExists) {
@@ -63,15 +70,24 @@ public class fileDownload extends AppCompatActivity {
                         con2.setRequestProperty("Authorization", authToken);
                         resCode = con2.getResponseCode();
                         if (resCode == 200) {
-                            ReadableByteChannel rbc = Channels.newChannel(con.getInputStream());
-                            FileOutputStream fos = new FileOutputStream("information.html");
-                            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-//                            BufferedReader in = new BufferedReader(new InputStreamReader(con2.getInputStream()));
-//                            String inputLine;
-//                            while ((inputLine = in.readLine()) != null) {
-//                                fileJson.append(inputLine);
-//                            }
-
+                            String storagePath = Library.context.getFilesDir().getPath();
+                            File dir = new File(storagePath +"/compact drive");
+                            if(dir.exists()) {
+                                String filePath = storagePath + "/compact drive/"+filename;
+                                my_file = new File(filePath);
+                                boolean fileExists = my_file.exists();
+                                if (fileExists) {
+                                    return null;
+                                } else {
+                                    try {
+                                        ReadableByteChannel rbc = Channels.newChannel(con.getInputStream());
+                                        FileOutputStream fos = new FileOutputStream(my_file);
+                                        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                                    } catch (Exception e) {
+                                        Log.i("file store problem", e.getMessage());
+                                    }
+                                }
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -81,6 +97,13 @@ public class fileDownload extends AppCompatActivity {
             return null;
         }
 
+        @Override
+        protected void onPostExecute(Object o) {
+            super.onPostExecute(o);
+            ImageView imaged = (ImageView)findViewById(R.id.displayImage);
+            Bitmap myBitmap = BitmapFactory.decodeFile(my_file.getAbsolutePath());
+            imaged.setImageBitmap(myBitmap);
+        }
     }
 
 }

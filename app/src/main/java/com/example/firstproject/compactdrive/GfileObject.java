@@ -8,7 +8,7 @@ import org.json.JSONException;
 import java.io.Serializable;
 import java.net.URL;
 
-class GfileObject implements Serializable {
+class GfileObject {
     private String id=null;
     private String title=null;
     private JSONArray owner = new JSONArray();

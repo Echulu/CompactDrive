@@ -16,11 +16,11 @@ import java.nio.channels.ReadableByteChannel;
 
 public class fileDownload extends AppCompatActivity {
 
-    GfileObject gfo = new GfileObject();
+    GfileObject gfo = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        gfo = (GfileObject)getIntent().getSerializableExtra("GfileObject");
         setContentView(R.layout.activity_file_download);
     }
     class My_Task extends AsyncTask{

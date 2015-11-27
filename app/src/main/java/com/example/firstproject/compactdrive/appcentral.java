@@ -188,7 +188,9 @@ public class appcentral extends Activity
                             }
                         }
                         else{
-
+                            Intent t = new Intent(appcentral.this,fileDownload.class);
+                            t.putExtra("GfileObject", temp);
+                            startActivity(t);
                         }
                     }
                 });
@@ -207,9 +209,8 @@ public class appcentral extends Activity
                         name.setText(":"+temp.getTitle());
                         dateOfCreation.setText(":"+temp.getDoc());
                         dateOfModification.setText(":"+temp.getDom());
-                        owners.setText(":"+temp.getOwners());
+                        owners.setText(":" + temp.getOwners());
                         PopupWindow my_popup = new PopupWindow(popupView, ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, true);
-                        my_popup.setBackgroundDrawable(new BitmapDrawable());
                         my_popup.setOutsideTouchable(true);
                         my_popup.setFocusable(true);
                         my_popup.showAtLocation(popupView, Gravity.CENTER, 0, 0);

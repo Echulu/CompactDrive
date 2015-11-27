@@ -4,9 +4,11 @@ import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import java.io.Serializable;
 import java.net.URL;
 
-class GfileObject {
+class GfileObject implements Serializable {
     private String id=null;
     private String title=null;
     private JSONArray owner = new JSONArray();

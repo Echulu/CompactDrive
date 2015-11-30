@@ -4,14 +4,12 @@ package com.example.firstproject.compactdrive;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -22,18 +20,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-
-import android.widget.ImageView;
 import android.widget.ListView;
-
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
-
-
-import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -113,6 +104,7 @@ public class appcentral extends Activity
 
         private StringBuffer fileJson = new StringBuffer();
 
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -162,9 +154,9 @@ public class appcentral extends Activity
         @Override
         protected void onPostExecute(final Object o) {
             super.onPostExecute(o);
-            ArrayList<GfileObject> resultList = new ArrayList<>();
+            ArrayList<GfileObject> resultList;
             try {
-                GoogleChildrenTree.populateTree((JSONObject)new JSONObject(fileJson.toString()));
+                GoogleChildrenTree.populateTree(new JSONObject(fileJson.toString()));
                 resultList = Children_Population.getChilds("root",GoogleChildrenTree.getChildrenByParent("root"));
 
                 FileAdapter ap = new FileAdapter(appcentral.this,resultList);
@@ -190,8 +182,10 @@ public class appcentral extends Activity
                         }
                         else{
                             Intent t = new Intent(appcentral.this,fileDownload.class);
-                            t.putExtra("fileURL",temp.getUrl());
-                            t.putExtra("filename",temp.getTitle());
+                            URL k = temp.getUrl();
+                            t.putExtra("downURL", k.toString());
+                            t.putExtra("MType", temp.getMimeType().toString());
+                            t.putExtra("filename",temp.getTitle().toString());
                             startActivity(t);
                         }
                     }
@@ -231,14 +225,14 @@ public class appcentral extends Activity
                 });
             }
             catch (Exception e){
-                Log.e("Exception in appcentral class", e.getMessage());
+                Log.e(" appcentral class", e.getMessage());
             }
         }
     }
     @Override
     public void onBackPressed() {
 
-        ArrayList<GfileObject> resultList = new ArrayList<>();
+        ArrayList<GfileObject> resultList;
         try {
             String parentId = parentStack.pop();
             resultList = Children_Population.getChilds(parentId,GoogleChildrenTree.getChildrenByParent(parentId));

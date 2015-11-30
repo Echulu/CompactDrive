@@ -18,6 +18,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -207,16 +208,25 @@ public class appcentral extends Activity
                         TextView dateOfCreation = (TextView) popupView.findViewById(R.id.dateofcreation);
                         TextView dateOfModification = (TextView) popupView.findViewById(R.id.dateofModification);
                         TextView owners = (TextView) popupView.findViewById(R.id.ownerslist);
-                        name.setText(":"+temp.getTitle());
-                        dateOfCreation.setText(":"+temp.getDoc());
-                        dateOfModification.setText(":"+temp.getDom());
+                        name.setText(":" + temp.getTitle());
+                        dateOfCreation.setText(":" + temp.getDoc());
+                        dateOfModification.setText(":" + temp.getDom());
                         owners.setText(":" + temp.getOwners());
-                        PopupWindow my_popup = new PopupWindow(popupView, ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, true);
+                        final PopupWindow my_popup = new PopupWindow(popupView, ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT, true);
                         my_popup.setOutsideTouchable(true);
                         my_popup.setFocusable(true);
                         my_popup.showAtLocation(popupView, Gravity.CENTER, 0, 0);
-                        return true;
+                        my_popup.setTouchInterceptor(new View.OnTouchListener() {
 
+                            public boolean onTouch(View v, MotionEvent event) {
+                                if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                                    my_popup.dismiss();
+                                    return true;
+                                }
+                                return false;
+                            }
+                        });
+                        return true;
                     }
                 });
             }

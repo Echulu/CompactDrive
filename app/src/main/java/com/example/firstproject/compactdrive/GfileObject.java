@@ -13,6 +13,7 @@ class GfileObject {
     private String dateOfCreation = null;
     private String dateOfModification = null;
     private String mimeType =null;
+    private long size ;
     private String parentId = null;
     private URL url=null;
     public String getID(){
@@ -74,5 +75,11 @@ class GfileObject {
     }
     public URL getUrl() {
         return url;
+    }
+    public long getSize() {
+        return size;
+    }
+    public void setSize(long size) {
+        this.size = size;
     }
 }

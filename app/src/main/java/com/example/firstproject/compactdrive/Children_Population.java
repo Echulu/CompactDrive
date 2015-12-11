@@ -31,8 +31,10 @@ public class Children_Population{
                         tem.setMimeType(temp.getString("mimeType"));
                         tem.setOwners(temp.getJSONArray("ownerNames"));
                         tem.setDom(temp.getString("modifiedDate"));
-                        if(!tem.getMimeType().equals("application/vnd.google-apps.folder"))
-                                tem.setUrl(temp.getString("downloadUrl"));
+                        if(!tem.getMimeType().equals("application/vnd.google-apps.folder")) {
+                            tem.setUrl(temp.getString("downloadUrl"));
+                            tem.setSize(temp.getLong("fileSize"));
+                        }
                         tem.setDoc(temp.getString("createdDate"));
                         tem.setParentId(parent);
                         resultList.add(tem);

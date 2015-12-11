@@ -11,13 +11,9 @@
             android:icon="@android:drawable/ic_dialog_email"
             android:title="One Drive"
             />
-
         <item
             android:id="@+id/nav_dropbox"
-            android:icon="@android:drawable/ic_dialog_email"
-            android:title="Drop Box" />
-
+            android:icon="@drawable/dropbox"
+            android:title="Drop Box"/>
     </group>
-
-
 </menu>

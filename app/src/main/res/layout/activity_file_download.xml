@@ -22,4 +22,12 @@
         android:layout_alignLeft="@+id/displayImage"
         android:layout_alignStart="@+id/displayImage" />
 
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/display_all"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentStart="false" />
+
 </RelativeLayout>

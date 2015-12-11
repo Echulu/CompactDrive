@@ -1,51 +1,58 @@
 package com.example.firstproject.compactdrive;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.Image;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.webkit.WebView;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
+
 
 public class fileDownload extends AppCompatActivity {
 
     private String fileURL=null;
     private String filename=null;
     private String Mtype = null;
+    private long fileSize;
     File my_file;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fileURL = getIntent().getStringExtra("downURL");
         filename = getIntent().getStringExtra("filename");
-        Mtype = getIntent().getStringExtra("MType");
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        Mtype = getIntent().getStringExtra("mimeType");
+        fileSize = getIntent().getLongExtra("fileSize",0);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         new My_Task().execute();
         setContentView(R.layout.activity_file_download);
 
     }
-    class My_Task extends AsyncTask{
+    class My_Task extends AsyncTask {
+
+        ProgressDialog dialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(fileDownload.this);
+            dialog.setMessage("Loading...");
+            dialog.setCancelable(false);
+            dialog.setInverseBackgroundForced(false);
+            dialog.show();
+        }
 
         @Override
         protected Object doInBackground(Object[] params) {
+            boolean flag = false;
             if (Client.aceToken != null) {
                 try {
                     URL temp = new URL(fileURL);
@@ -55,55 +62,37 @@ public class fileDownload extends AppCompatActivity {
                     con.setRequestProperty("Authorization", authToken);
                     int resCode = con.getResponseCode();
                     if (resCode == 200) {
+                        flag = true;
+                    } else if (resCode == 401) {
+                        Client.refreshToken();
+                        con = (HttpURLConnection) temp.openConnection();
+                        con.setRequestMethod("GET");
+                        authToken = "OAuth " + Client.aceToken;
+                        con.setRequestProperty("Authorization", authToken);
+                        flag=true;
+                    }
+                    if (flag) {
                         String storagePath = Library.context.getFilesDir().getPath();
-                        File dir = new File(storagePath +"/compact drive");
-                        if(dir.exists()) {
-                            String filePath = storagePath + "/compact drive/"+filename;
+                        File dir = new File(storagePath + "/compact drive");
+                        if (dir.exists()) {
+                            String filePath = storagePath + "/compact drive/" + filename;
                             my_file = new File(filePath);
                             boolean fileExists = my_file.exists();
-                            if(con.getContentLength() != -1) {
+                            if (fileSize > 0) {
                                 if (fileExists) {
                                     return null;
                                 } else {
                                     try {
-                                        DataInputStream in = new DataInputStream(con.getInputStream());
-                                        byte[] buffer = new byte[con.getContentLength()];
-                                        in.readFully(buffer);
-                                        in.close();
-                                        if(buffer.length > 0) {
-                                            DataOutputStream out = new DataOutputStream(new FileOutputStream(my_file));
-                                            out.write(buffer);
-                                            out.flush();
-                                            out.close();
+                                        InputStream inputStream = con.getInputStream();
+                                        OutputStream outputStream = new FileOutputStream(my_file);
+                                        byte[] buffer = new byte[1024];
+                                        int bytesRead = 0;
+                                        while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                            outputStream.write(buffer, 0, bytesRead);
+                                            outputStream.flush();
                                         }
-                                    } catch (Exception e) {
-                                        Log.i("file store problem", e.getMessage());
-                                    }
-                               }
-                            }
-                        }
-                    } else if (resCode == 401) {
-
-                        Client.refreshToken();
-                        HttpURLConnection con2 = (HttpURLConnection) temp.openConnection();
-                        con2.setRequestMethod("GET");
-                        authToken = "OAuth " + Client.aceToken;
-                        con2.setRequestProperty("Authorization", authToken);
-                        resCode = con2.getResponseCode();
-                        if (resCode == 200) {
-                            String storagePath = Library.context.getFilesDir().getPath();
-                            File dir = new File(storagePath +"/compact drive");
-                            if(dir.exists()) {
-                                String filePath = storagePath + "/compact drive/"+filename;
-                                my_file = new File(filePath);
-                                boolean fileExists = my_file.exists();
-                                if (fileExists) {
-                                    return null;
-                                } else {
-                                    try {
-                                        ReadableByteChannel rbc = Channels.newChannel(con.getInputStream());
-                                        FileOutputStream fos = new FileOutputStream(my_file);
-                                        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                                        inputStream.close();
+                                        outputStream.close();
                                     } catch (Exception e) {
                                         Log.i("file store problem", e.getMessage());
                                     }
@@ -111,8 +100,12 @@ public class fileDownload extends AppCompatActivity {
                             }
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    else{
+                        Log.i("fileDownload","connection problem......");
+                    }
+                }
+                catch(Exception e){
+                    Log.i("fileDownload",e.getMessage());
                 }
             }
             return null;
@@ -121,33 +114,18 @@ public class fileDownload extends AppCompatActivity {
         @Override
         protected void onPostExecute(Object o) {
             super.onPostExecute(o);
-            if(Mtype.equals("text/plain")){
-                TextView d_file = (TextView)findViewById(R.id.displayText);
-                d_file.setBackgroundResource(R.color.white);
-                StringBuilder text = new StringBuilder();
-                try {
-                    BufferedReader br = new BufferedReader(new FileReader(my_file));
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        text.append(line);
-                        text.append('\n');
-                    }
-                    br.close();
-                }
-                catch (Exception e) {
-                    Log.i("displayFile",e.getMessage());
-                }
-                d_file.setText(text);
+            dialog.hide();
+            try {
+//                Intent openIntent = new Intent(Intent.ACTION_VIEW);
+//                openIntent.setDataAndType(Uri.fromFile(my_file), Mtype);
+//                startActivity(openIntent);
+                WebView wview  = (WebView)findViewById(R.id.display_all);
+                wview.getSettings().getBuiltInZoomControls();
+                wview.loadUrl("file://"+my_file.getPath());
             }
-            else if(Mtype.startsWith("image\\")) {
-                ImageView imaged = (ImageView) findViewById(R.id.displayImage);
-                Bitmap myBitmap = BitmapFactory.decodeFile(my_file.getAbsolutePath());
-                imaged.setImageBitmap(myBitmap);
+            catch (Exception e) {
+                Log.e("fileDownload",e.getMessage());
             }
-            else{
-                
-            }
-        }
+         }
     }
-
 }

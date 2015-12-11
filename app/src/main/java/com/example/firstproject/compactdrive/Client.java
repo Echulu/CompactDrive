@@ -67,7 +67,7 @@ public class Client {
                     JSONObject o = new JSONObject(response.toString());
                     aceToken = o.getString("access_token");
                     refToken = o.getString("refresh_token");
-                    storeTokens(o);
+                    storeTokens();
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -105,7 +105,7 @@ public class Client {
                     }
                     JSONObject o = new JSONObject(response.toString());
                     aceToken = o.getString("access_token");
-                    storeTokens(o);
+                    storeTokens();
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -156,7 +156,7 @@ public class Client {
         }
     }
 
-    private static void storeTokens(JSONObject object){
+    private static void storeTokens(){
         Properties prop = new Properties();
         OutputStream out = null;
         try {

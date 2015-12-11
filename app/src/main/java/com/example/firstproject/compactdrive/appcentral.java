@@ -3,7 +3,10 @@ package com.example.firstproject.compactdrive;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -20,12 +23,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.json.JSONObject;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -44,9 +50,8 @@ public class appcentral extends Activity
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_test);
         toolbar= (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Compact Drive");
-        Toast.makeText(getApplication().getBaseContext(),"Google Drive Connected",
-                Toast.LENGTH_SHORT).show();
+        toolbar.setTitle("Welcome");
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.openDrawer(Gravity.LEFT);
@@ -57,39 +62,58 @@ public class appcentral extends Activity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
     }
 
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.test, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        int id = item.getItemId();
-
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         if (id == R.id.nav_gmail) {
-            toolbar .setTitle("Gmail");
+            if (Client.aceToken != null){
+                final ImageButton logout = (ImageButton) findViewById(R.id.inout);
             new Gmail().execute();
+            toolbar.setTitle("Gmail");
+            logout.setVisibility(View.VISIBLE);
+            logout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new AlertDialog.Builder(appcentral.this)
+                            .setTitle("Logout")
+                            .setMessage("Are You Sure?")
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    String storagePath = Library.context.getFilesDir().getPath();
+                                    File dir = new File(storagePath + "/compact drive");
+                                    if (!dir.exists()) {
+                                        return;
+                                    }
+                                    String filePath = storagePath + "/compact drive/G_tokens.properties";
+                                    File tokens = new File(filePath);
+                                    boolean fileExists = tokens.exists();
+                                    if (fileExists) {
+                                        tokens.delete();
+                                        ListView list = (ListView) findViewById(R.id.listView);
+                                        list.setAdapter(null);
+                                        toolbar.setTitle("Welcome");
+                                        logout.setVisibility(View.INVISIBLE);
+                                        Client.aceToken = null;
+                                        Client.CODE = null;
+                                    }
+                                    Toast.makeText(appcentral.this, "Signed Out", Toast.LENGTH_SHORT).show();
+
+                                }
+                            })
+                            .setNegativeButton(android.R.string.no, null).show();
+                }
+            });
+        }
+            else{
+                startActivityForResult(new Intent(this, Auth.class), 1);
+            }
         } else if (id == R.id.nav_onedrive) {
             toolbar .setTitle("One Drive");
         } else if (id == R.id.nav_dropbox) {
@@ -100,15 +124,22 @@ public class appcentral extends Activity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1)
+            new Gmail().execute();
+    }
+
     public class Gmail extends AsyncTask {
 
         private StringBuffer fileJson = new StringBuffer();
-
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             Client.populateTokens();
+            String t = Client.aceToken;
         }
 
         @Override
@@ -162,6 +193,7 @@ public class appcentral extends Activity
                 FileAdapter ap = new FileAdapter(appcentral.this,resultList);
                 final ListView list = (ListView)findViewById(R.id.listView);
                 list.setAdapter(ap);
+
                 list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -170,7 +202,6 @@ public class appcentral extends Activity
                             try {
 
                                 ArrayList<GfileObject> adapter_result;
-
                                 adapter_result = Children_Population.getChilds(temp.getID(), GoogleChildrenTree.getChildrenByParent(temp.getID()));
                                 parentStack.push(temp.getParentId());
                                 FileAdapter ap = new FileAdapter(appcentral.this, adapter_result);
@@ -186,10 +217,13 @@ public class appcentral extends Activity
                             t.putExtra("downURL", k.toString());
                             t.putExtra("MType", temp.getMimeType().toString());
                             t.putExtra("filename",temp.getTitle().toString());
+                            t.putExtra("fileSize",temp.getSize());
+                            t.putExtra("mimeType",temp.getMimeType());
                             startActivity(t);
                         }
                     }
                 });
+
                 list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -224,7 +258,7 @@ public class appcentral extends Activity
                     }
                 });
             }
-            catch (Exception e){
+            catch (Exception e) {
                 Log.e(" appcentral class", e.getMessage());
             }
         }
@@ -245,7 +279,7 @@ public class appcentral extends Activity
             startActivity(gmail);
         }
         catch (Exception e){
-            Log.i("Exception in appcentral class", e.getMessage());
+            Log.i("appcentral class2", e.getMessage());
         }
     }
 
